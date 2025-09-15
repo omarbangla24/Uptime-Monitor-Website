@@ -218,3 +218,17 @@
 .notification-info {
     @apply border-l-4 border-primary-500;
 }
+/* Add to existing CSS */
+.bg-grid-pattern {
+    background-image:
+        linear-gradient(rgba(0,0,0,0.1) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,0,0,0.1) 1px, transparent 1px);
+    background-size: 20px 20px;
+}
+
+.line-clamp-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
