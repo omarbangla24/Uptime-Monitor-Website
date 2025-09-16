@@ -126,12 +126,22 @@ class User extends Authenticatable implements MustVerifyEmail
         return max(0, $limit - $this->websites()->count());
     }
 
-    public function hasFeature($feature)
-    {
-        if (!$this->subscriptionPlan) return false;
+    // public function hasFeature($feature)
+    // {
+    //     if (!$this->subscriptionPlan) return false;
 
-        return $this->subscriptionPlan->{$feature} ?? false;
+    //     return $this->subscriptionPlan->{$feature} ?? false;
+    // }
+
+    public function hasFeature($feature)
+{
+    if (!$this->subscriptionPlan) {
+        // Free plan features
+        return in_array($feature, ['email_alerts']);
     }
+
+    return $this->subscriptionPlan->{$feature} ?? false;
+}
 
     public function updateLastActivity()
     {

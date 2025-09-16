@@ -8,17 +8,17 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-class WebsiteDownNotification extends Notification implements ShouldQueue
+class WebsiteUpNotification extends Notification implements ShouldQueue
 {
     use Queueable;
 
     protected $website;
-    protected $errorMessage;
+    protected $responseTime;
 
-    public function __construct(Website $website, $errorMessage = null)
+    public function __construct(Website $website, $responseTime = null)
     {
         $this->website = $website;
-        $this->errorMessage = $errorMessage;
+        $this->responseTime = $responseTime;
     }
 
     public function via($notifiable): array
@@ -35,29 +35,29 @@ class WebsiteDownNotification extends Notification implements ShouldQueue
     public function toMail($notifiable): MailMessage
     {
         return (new MailMessage)
-            ->error()
-            ->subject("🚨 Website Down: {$this->website->name}")
-            ->greeting("Website Alert")
-            ->line("Your website **{$this->website->name}** appears to be down.")
+            ->success()
+            ->subject("✅ Website Back Online: {$this->website->name}")
+            ->greeting("Website Restored")
+            ->line("Great news! Your website **{$this->website->name}** is back online.")
             ->line("**URL:** {$this->website->url}")
             ->line("**Domain:** {$this->website->domain}")
-            ->when($this->errorMessage, function($mail) {
-                return $mail->line("**Error:** {$this->errorMessage}");
+            ->when($this->responseTime, function($mail) {
+                return $mail->line("**Response Time:** {$this->responseTime}ms");
             })
             ->line("**Time:** " . now()->format('M j, Y \a\t g:i A T'))
-            ->action('Check Website Status', route('websites.show', $this->website))
-            ->line('We will continue monitoring and notify you when the website is back online.')
+            ->action('View Website Details', route('websites.show', $this->website))
+            ->line('Your website is now responding normally.')
             ->salutation("Best regards,\nUptimeMonitor Team");
     }
 
     public function toDatabase($notifiable): array
     {
         return [
-            'type' => 'website_down',
+            'type' => 'website_up',
             'website_id' => $this->website->id,
             'website_name' => $this->website->name,
             'website_url' => $this->website->url,
-            'error_message' => $this->errorMessage,
+            'response_time' => $this->responseTime,
             'checked_at' => now()->toISOString(),
         ];
     }

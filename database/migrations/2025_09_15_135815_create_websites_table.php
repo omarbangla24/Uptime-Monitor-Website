@@ -29,6 +29,8 @@ return new class extends Migration
             $table->integer('ssl_expiry_reminder_days')->default(30);
             $table->boolean('monitor_dns')->default(false);
             $table->boolean('monitor_domain_expiry')->default(false);
+            $table->timestamp('domain_expiry_date')->nullable();
+$table->timestamp('domain_expiry_checked_at')->nullable();
             $table->integer('domain_expiry_reminder_days')->default(30);
             $table->boolean('is_active')->default(true);
             $table->boolean('is_public')->default(false);
@@ -43,6 +45,7 @@ return new class extends Migration
             $table->json('contact_groups')->nullable(); // email addresses for alerts
             $table->json('tags')->nullable();
             $table->text('notes')->nullable();
+
             $table->timestamps();
 
             $table->index(['user_id', 'is_active']);
