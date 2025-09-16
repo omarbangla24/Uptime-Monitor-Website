@@ -424,3 +424,32 @@
 .filter-section {
     @apply grid grid-cols-1 md:grid-cols-4 gap-4 items-end;
 }
+/* inputs */
+.form-input {
+  @apply block w-full rounded-md shadow-sm
+         bg-white text-gray-900 border-gray-300
+         focus:ring-primary-500 focus:border-primary-500
+         dark:bg-dark-700 dark:text-white dark:border-dark-600;
+}
+
+/* selects */
+.form-select {
+  @apply block w-full rounded-md shadow-sm
+         bg-white text-gray-900 border-gray-300
+         focus:ring-primary-500 focus:border-primary-500
+         dark:bg-dark-700 dark:text-white dark:border-dark-600;
+}
+
+/* textareas */
+.form-textarea {
+  @apply block w-full rounded-md shadow-sm
+         bg-white text-gray-900 border-gray-300
+         focus:ring-primary-500 focus:border-primary-500
+         dark:bg-dark-700 dark:text-white dark:border-dark-600;
+}
+
+/* optional: placeholder colors */
+.form-input::placeholder,
+.form-textarea::placeholder {
+  @apply text-gray-400 dark:text-gray-400;
+}

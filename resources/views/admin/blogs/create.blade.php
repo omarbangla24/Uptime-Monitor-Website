@@ -2,13 +2,13 @@
 
 @section('title', 'Create Blog Post')
 
+{{-- TinyMCE self-hosted via Vite; no CDN needed --}}
 @push('head')
-<script src="https://cdn.tiny.cloud/1/no-api-key/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
 @endpush
 
 @section('content')
 <div class="px-4 sm:px-6 lg:px-8 py-8">
-    <div class="max-w-4xl mx-auto">
+    <div class="mx-auto">
         <div class="md:flex md:items-center md:justify-between">
             <div class="flex-1 min-w-0">
                 <h2 class="text-2xl font-bold leading-7 text-gray-900 dark:text-white sm:text-3xl sm:truncate">
@@ -64,8 +64,7 @@
                             <!-- Content -->
                             <div class="mb-6">
                                 <label for="content" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Content *</label>
-                                <textarea name="content" id="content" rows="15" required
-                                          class="form-textarea mt-1 @error('content') border-red-500 @enderror">{{ old('content') }}</textarea>
+                               <textarea name="content" id="content" class="form-textarea js-tinymce" rows="15">{{ old('content') }}</textarea>
                                 @error('content')
                                     <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                                 @enderror
@@ -199,37 +198,29 @@
 @endsection
 
 @push('scripts')
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Auto-generate slug from title
-    const titleInput = document.getElementById('title');
-    const slugInput = document.getElementById('slug');
 
-    titleInput.addEventListener('input', function() {
-        if (!slugInput.value) {
-            const slug = this.value
-                .toLowerCase()
-                .replace(/[^a-z0-9 -]/g, '')
-                .replace(/\s+/g, '-')
-                .replace(/-+/g, '-')
-                .trim('-');
-            slugInput.value = slug;
+    {{-- Load only on this page --}}
+    @vite('resources/js/pages/blog-create.js')
+
+    {{-- Slug auto-generator --}}
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const titleInput = document.getElementById('title');
+        const slugInput = document.getElementById('slug');
+
+        if (titleInput && slugInput) {
+            titleInput.addEventListener('input', function() {
+                if (!slugInput.value) {
+                    const slug = this.value
+                        .toLowerCase()
+                        .replace(/[^a-z0-9 -]/g, '')
+                        .replace(/\s+/g, '-')
+                        .replace(/-+/g, '-')
+                        .replace(/^-+|-+$/g, ''); // trim leading/trailing dashes
+                    slugInput.value = slug;
+                }
+            });
         }
     });
-
-    // Initialize TinyMCE
-    tinymce.init({
-        selector: '#content',
-        height: 400,
-        menubar: false,
-        plugins: [
-            'advlist', 'autolink', 'lists', 'link', 'image', 'charmap', 'preview',
-            'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen',
-            'insertdatetime', 'media', 'table', 'help', 'wordcount'
-        ],
-        toolbar: 'undo redo | blocks | bold italic forecolor | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | removeformat | help',
-        content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px }'
-    });
-});
-</script>
+    </script>
 @endpush

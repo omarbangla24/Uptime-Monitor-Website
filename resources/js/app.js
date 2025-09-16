@@ -2,6 +2,11 @@ import './bootstrap';
 
 import Alpine from 'alpinejs';
 import persist from '@alpinejs/persist';
+// resources/js/app.js
+import './bootstrap';
+import './globals/tiny-global'; // ✅ সব পেজে TinyMCE অটো-ইনিট
+
+
 
 // Alpine plugins
 Alpine.plugin(persist);
