@@ -16,9 +16,9 @@ class PageController extends Controller
 
         if ($request->has('search') && $request->search) {
             $search = $request->search;
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->where('title', 'like', "%{$search}%")
-                  ->orWhere('content', 'like', "%{$search}%");
+                    ->orWhere('content', 'like', "%{$search}%");
             });
         }
 
@@ -39,31 +39,38 @@ class PageController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'title' => 'required|string|max:255',
-            'slug' => 'nullable|string|max:255|unique:pages',
-            'content' => 'required|string',
-            'excerpt' => 'nullable|string|max:500',
-            'meta_title' => 'nullable|string|max:255',
+            'title'            => 'required|string|max:255',
+            'slug'             => 'nullable|string|max:255|unique:pages',
+            'content'          => 'required|string',
+            'excerpt'          => 'nullable|string|max:500',
+            'meta_title'       => 'nullable|string|max:255',
             'meta_description' => 'nullable|string|max:500',
-            'meta_keywords' => 'nullable|array',
-            'og_image' => 'nullable|image|max:2048',
-            'status' => 'required|in:draft,published,private',
-            'is_featured' => 'boolean',
-            'template' => 'nullable|string|max:50',
-            'published_at' => 'nullable|date',
+            'meta_keywords'    => 'nullable|array',
+            'og_image'         => 'nullable|image|max:2048',
+            'status'           => 'required|in:draft,published,private',
+            'is_featured'      => 'boolean',
+            'template'         => 'nullable|string|max:50',
+            'published_at'     => 'nullable|date',
         ]);
 
-        if (!$validated['slug']) {
+        // Ensure keys exist and set default values
+        // Checkbox: if not sent, treat as false
+        $validated['is_featured'] = $request->boolean('is_featured');
+        // Default null if not provided
+        $validated['published_at'] = $validated['published_at'] ?? null;
+
+        // Generate slug if missing
+        if (empty($validated['slug'])) {
             $validated['slug'] = Str::slug($validated['title']);
         }
 
         // Handle OG image upload
         if ($request->hasFile('og_image')) {
             $validated['og_image'] = $request->file('og_image')
-                                            ->store('pages/images', 'public');
+                ->store('pages/images', 'public');
         }
 
-        // Set published_at for published pages
+        // Set published_at if status is published and no date given
         if ($validated['status'] === 'published' && !$validated['published_at']) {
             $validated['published_at'] = now();
         }
@@ -71,7 +78,7 @@ class PageController extends Controller
         Page::create($validated);
 
         return redirect()->route('admin.pages.index')
-                        ->with('success', 'Page created successfully.');
+            ->with('success', 'Page created successfully.');
     }
 
     public function show(Page $page)
@@ -87,29 +94,50 @@ class PageController extends Controller
     public function update(Request $request, Page $page)
     {
         $validated = $request->validate([
-            'title' => 'required|string|max:255',
-            'slug' => 'nullable|string|max:255|unique:pages,slug,' . $page->id,
-            'content' => 'required|string',
-            'excerpt' => 'nullable|string|max:500',
-            'meta_title' => 'nullable|string|max:255',
+            'title'            => 'required|string|max:255',
+            'slug'             => 'nullable|string|max:255|unique:pages,slug,' . $page->id,
+            'content'          => 'required|string',
+            'excerpt'          => 'nullable|string|max:500',
+            'meta_title'       => 'nullable|string|max:255',
             'meta_description' => 'nullable|string|max:500',
-            'meta_keywords' => 'nullable|array',
-            'og_image' => 'nullable|image|max:2048',
-            'status' => 'required|in:draft,published,private',
-            'is_featured' => 'boolean',
-            'template' => 'nullable|string|max:50',
-            'published_at' => 'nullable|date',
+            'meta_keywords'    => 'nullable|array',
+            'og_image'         => 'nullable|image|max:2048',
+            'status'           => 'required|in:draft,published,private',
+            'is_featured'      => 'boolean',
+            'template'         => 'nullable|string|max:50',
+            'published_at'     => 'nullable|date',
         ]);
+
+        // Ensure keys exist and set default values
+        $validated['is_featured']   = $request->boolean('is_featured');
+        $validated['published_at']  = $validated['published_at'] ?? null;
+
+        // Generate slug if blank
+        if (empty($validated['slug'])) {
+            $base = Str::slug($validated['title']);
+            $slug = $base;
+            $i    = 1;
+            // Ensure unique slug across pages
+            while (Page::where('slug', $slug)->where('id', '!=', $page->id)->exists()) {
+                $slug = $base . '-' . $i++;
+            }
+            $validated['slug'] = $slug;
+        }
 
         // Handle OG image upload
         if ($request->hasFile('og_image')) {
-            // Delete old image
+            // Delete old image if it exists
             if ($page->og_image) {
                 Storage::disk('public')->delete($page->og_image);
             }
 
             $validated['og_image'] = $request->file('og_image')
-                                            ->store('pages/images', 'public');
+                ->store('pages/images', 'public');
+        }
+
+        // If the page is now published and no date provided, set it to now()
+        if ($validated['status'] === 'published' && !$validated['published_at']) {
+            $validated['published_at'] = now();
         }
 
         $page->update($validated);
@@ -127,6 +155,6 @@ class PageController extends Controller
         $page->delete();
 
         return redirect()->route('admin.pages.index')
-                        ->with('success', 'Page deleted successfully.');
+            ->with('success', 'Page deleted successfully.');
     }
 }

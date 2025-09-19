@@ -50,7 +50,7 @@
                         <option value="">Select...</option>
                         <option value="general" {{ old('type') === 'general' ? 'selected' : '' }}>General</option>
                         <option value="support" {{ old('type') === 'support' ? 'selected' : '' }}>Support</option>
-                        <option value="sales" {{ old('type') === sales ? 'selected' : '' }}>Sales</option>
+                            <option value="sales" {{ old('type') === 'sales' ? 'selected' : '' }}>Sales</option>
                         <option value="technical" {{ old('type') === 'technical' ? 'selected' : '' }}>Technical</option>
                         <option value="billing" {{ old('type') === 'billing' ? 'selected' : '' }}>Billing</option>
                     </select>
