@@ -10,8 +10,6 @@ use App\Http\Controllers\Admin\SettingsController;
 use App\Http\Controllers\Admin\AnalyticsController;
 use App\Http\Middleware\AdminMiddleware;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Admin\SubscriptionController;
-
 
 Route::middleware(['auth', AdminMiddleware::class])->prefix('admin')->name('admin.')->group(function () {
 
@@ -50,10 +48,20 @@ Route::middleware(['auth', AdminMiddleware::class])->prefix('admin')->name('admi
     Route::get('system', [AdminController::class, 'systemInfo'])->name('system.info');
 
     // Subscription Plans Management
-Route::resource('subscriptions', SubscriptionController::class);
-Route::post('subscriptions/{subscription}/toggle-status', [SubscriptionController::class, 'toggleStatus'])
-    ->name('subscriptions.toggleStatus');
-Route::get('subscriptions/{subscription}/users', [SubscriptionController::class, 'users'])
-    ->name('subscriptions.users');
+    // To avoid conflicts with the resourceful show route (subscriptions/{subscription}),
+    // we register manual assignment routes with a unique slug *before* the resource.
+    Route::get('subscriptions/manual-assign', [App\Http\Controllers\Admin\SubscriptionController::class, 'assignForm'])
+        ->name('subscriptions.assignForm');
+    Route::post('subscriptions/manual-assign', [App\Http\Controllers\Admin\SubscriptionController::class, 'assign'])
+        ->name('subscriptions.assign');
 
+    // Register CRUD routes for subscription plans. Allows admins to view,
+    // create, edit and delete plans from the dashboard.
+    Route::resource('subscriptions', App\Http\Controllers\Admin\SubscriptionController::class);
+
+    // Additional routes for subscriptions: toggle plan status and view users under a plan.
+    Route::post('subscriptions/{subscription}/toggle-status', [App\Http\Controllers\Admin\SubscriptionController::class, 'toggleStatus'])
+        ->name('subscriptions.toggleStatus');
+    Route::get('subscriptions/{subscription}/users', [App\Http\Controllers\Admin\SubscriptionController::class, 'users'])
+        ->name('subscriptions.users');
 });
