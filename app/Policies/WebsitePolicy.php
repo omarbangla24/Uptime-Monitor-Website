@@ -17,11 +17,14 @@ class WebsitePolicy
         return $user->id === $website->user_id;
     }
 
-    public function create(User $user): bool
+    // public function create(User $user): bool
+    // {
+    //     return $user->canAddWebsites();
+    // }
+  public function create(User $user): bool
     {
-        return $user->canAddWebsites();
+        return true; // Allow all authenticated users to create websites
     }
-
     public function update(User $user, Website $website): bool
     {
         return $user->id === $website->user_id;

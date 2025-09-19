@@ -7,10 +7,11 @@ use App\Models\Website;
 use App\Models\User;
 use App\Jobs\CheckWebsiteStatus;
 use Illuminate\Http\Request;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
 class WebsiteController extends Controller
 {
-    
+ use AuthorizesRequests; 
 
     public function index(Request $request)
     {

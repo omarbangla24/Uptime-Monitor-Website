@@ -10,6 +10,8 @@ use App\Http\Controllers\Admin\SettingsController;
 use App\Http\Controllers\Admin\AnalyticsController;
 use App\Http\Middleware\AdminMiddleware;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Admin\SubscriptionController;
+
 
 Route::middleware(['auth', AdminMiddleware::class])->prefix('admin')->name('admin.')->group(function () {
 
@@ -46,4 +48,12 @@ Route::middleware(['auth', AdminMiddleware::class])->prefix('admin')->name('admi
 
     // System Info
     Route::get('system', [AdminController::class, 'systemInfo'])->name('system.info');
+
+    // Subscription Plans Management
+Route::resource('subscriptions', SubscriptionController::class);
+Route::post('subscriptions/{subscription}/toggle-status', [SubscriptionController::class, 'toggleStatus'])
+    ->name('subscriptions.toggleStatus');
+Route::get('subscriptions/{subscription}/users', [SubscriptionController::class, 'users'])
+    ->name('subscriptions.users');
+
 });

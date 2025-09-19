@@ -6,9 +6,11 @@ use App\Models\Website;
 use App\Jobs\CheckWebsiteStatus;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
 class WebsiteController extends Controller
 {
+     use AuthorizesRequests; 
     public function index(Request $request)
     {
         $query = auth()->user()->websites()->with(['monitoringResults' => function($q) {
